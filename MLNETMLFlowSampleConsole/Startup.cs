@@ -25,10 +25,13 @@ namespace MLNETMLFlowSampleConsole
         public void ConfigureServices()
         {
             var services = new ServiceCollection();
+
+            // Add and configure MLFlow Service
             services.AddMFlowNet();
             services.Configure<MLFlowConfiguration>(
                 Configuration.GetSection(nameof(MLFlowConfiguration))
             );
+
             Services = services.BuildServiceProvider();
         }
     }
