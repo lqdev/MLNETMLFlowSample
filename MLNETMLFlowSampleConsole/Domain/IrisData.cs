@@ -1,6 +1,6 @@
 using Microsoft.ML.Data;
 
-namespace MLNETMLFlowSample.Domain
+namespace MLNETMLFlowSampleConsole.Domain
 {
     public class IrisData
     {
@@ -11,6 +11,6 @@ namespace MLNETMLFlowSample.Domain
 
         [LoadColumn(4),
         ColumnName("Label")]
-        public string FlowerType { get; set; }
+        public string IrisType { get; set; }
     }
 }

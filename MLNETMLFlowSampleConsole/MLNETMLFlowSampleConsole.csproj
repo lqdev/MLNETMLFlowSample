@@ -7,6 +7,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="1.0.0" />
+    <PackageReference Include="Microsoft.ML.AutoML" Version="0.3.0" />
+    <PackageReference Include="MLFlow.NET" Version="1.0.0-CI-20181206-054144" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data/iris.data">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

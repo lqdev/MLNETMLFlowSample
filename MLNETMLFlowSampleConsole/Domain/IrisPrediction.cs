@@ -1,6 +1,6 @@
 using Microsoft.ML.Data;
 
-namespace MLNETMLFlowSample.Domain
+namespace MLNETMLFlowSampleConsole.Domain
 {
     public class IrisPrediction : IrisData
     {
