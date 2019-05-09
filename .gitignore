@@ -293,6 +293,16 @@ node_modules/
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
 
+# Data
+
+**/Data/*
+
+# Models
+
+**/MLModels/*
+**/mlruns/*
+
+
 # Paket dependency manager
 .paket/paket.exe
 paket-files/

@@ -6,13 +6,17 @@ using Microsoft.ML.Data;
 using Microsoft.ML.AutoML;
 using Microsoft.Extensions.DependencyInjection;
 using MLNETMLFlowSampleConsole.Domain;
+using MLFlow.NET.Lib;
 using MLFlow.NET.Lib.Contract;
+using MLFlow.NET.Lib.Model;
+using MLFlow.NET.Lib.Model.Responses.Experiment;
+using MLFlow.NET.Lib.Model.Responses.Run;
 
 namespace MLNETMLFlowSampleConsole
 {
     class Program
     {
-        private static readonly IMLFlowService _mlFlowService;
+        private readonly static IMLFlowService _mlFlowService;
         static Program()
         {
             // Initialize app configuration
@@ -20,16 +24,16 @@ namespace MLNETMLFlowSampleConsole
             appConfig.ConfigureServices();
 
             // Initialize MLFlow service
-            _mlFlowService = appConfig.Services.GetRequiredService<IMLFlowService>();
+            _mlFlowService = appConfig.Services.GetService<IMLFlowService>();
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // Run experiment
-            RunExperiment();
+            await RunExperiment();
         }
 
-        public static async void RunExperiment()
+        public static async Task RunExperiment()
         {
             // 1. Create MLContext
             MLContext ctx = new MLContext();
@@ -39,9 +43,9 @@ namespace MLNETMLFlowSampleConsole
 
             // 3. Define Automated ML.NET experiment settings
             var experimentSettings = new MulticlassExperimentSettings();
-            experimentSettings.MaxExperimentTimeInSeconds = 120;
+            experimentSettings.MaxExperimentTimeInSeconds = 10;
             experimentSettings.OptimizingMetric = MulticlassClassificationMetric.LogLoss;
-
+            
             // 4. Create Automated ML.NET
             var experiment = ctx.Auto().CreateMulticlassClassificationExperiment(experimentSettings);
 
@@ -50,9 +54,12 @@ namespace MLNETMLFlowSampleConsole
             var experimentRequest = await _mlFlowService.GetOrCreateExperiment(experimentName);
 
             // 6. Run Automated ML.NET experiment
-            var experimentResults = experiment.Execute(data, progressHandler: new ProgressHandler(_mlFlowService, experimentRequest.ExperimentId));
+            var experimentResults = experiment.Execute(data, progressHandler: new ProgressHandler());
+            // var experimentResults = experiment.Execute(data);
 
-            // 7. Save Best Trained Model
+            // 7. Log Best Run
+            LogRun(experimentRequest.ExperimentId,experimentResults);
+            
             string savePath = Path.Join("MLModels", $"{experimentName}");
             string modelPath = Path.Join(savePath, "model.zip");
 
@@ -61,7 +68,33 @@ namespace MLNETMLFlowSampleConsole
                 Directory.CreateDirectory(savePath);
             }
 
+            // 8. Save Best Trained Model
             ctx.Model.Save(experimentResults.BestRun.Model, data.Schema, modelPath);
+        }
+
+        static async void LogRun(int experimentId, ExperimentResult<MulticlassClassificationMetrics> experimentResults)
+        {
+            // Define run
+            var runObject = new CreateRunRequest();
+            runObject.ExperimentId = experimentId;
+            runObject.StartTime = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
+            runObject.UserId = Environment.UserName;
+            runObject.SourceType = SourceType.LOCAL;
+
+            // Create new run in MLFlow
+            var runRequest = await _mlFlowService.CreateRun(runObject);
+
+            // Get information for best run
+            var runDetails = experimentResults.BestRun;
+
+            // Log trainer name
+            await _mlFlowService.LogParameter(runRequest.Run.Info.RunUuid, nameof(runDetails.TrainerName), runDetails.TrainerName);
+
+            // Log metrics
+            await _mlFlowService.LogMetric(runRequest.Run.Info.RunUuid, nameof(runDetails.RuntimeInSeconds), (float)runDetails.RuntimeInSeconds);
+            await _mlFlowService.LogMetric(runRequest.Run.Info.RunUuid, nameof(runDetails.ValidationMetrics.LogLoss), (float)runDetails.ValidationMetrics.LogLoss);
+            await _mlFlowService.LogMetric(runRequest.Run.Info.RunUuid, nameof(runDetails.ValidationMetrics.MacroAccuracy), (float)runDetails.ValidationMetrics.MacroAccuracy);
+            await _mlFlowService.LogMetric(runRequest.Run.Info.RunUuid, nameof(runDetails.ValidationMetrics.MicroAccuracy), (float)runDetails.ValidationMetrics.MicroAccuracy);
         }
     }
 }
