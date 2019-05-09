@@ -4,8 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using MLFlow.NET.Lib;
 using MLFlow.NET.Lib.Contract;
 using MLFlow.NET.Lib.Model;
-using MLFlow.NET.Lib.Model.Responses.Experiment;
-using MLFlow.NET.Lib.Model.Responses.Run;
 
 namespace MLNETMLFlowSampleConsole
 {

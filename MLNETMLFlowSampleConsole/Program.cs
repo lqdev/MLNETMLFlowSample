@@ -43,7 +43,7 @@ namespace MLNETMLFlowSampleConsole
 
             // 3. Define Automated ML.NET experiment settings
             var experimentSettings = new MulticlassExperimentSettings();
-            experimentSettings.MaxExperimentTimeInSeconds = 10;
+            experimentSettings.MaxExperimentTimeInSeconds = 30;
             experimentSettings.OptimizingMetric = MulticlassClassificationMetric.LogLoss;
             
             // 4. Create Automated ML.NET
@@ -55,8 +55,7 @@ namespace MLNETMLFlowSampleConsole
 
             // 6. Run Automated ML.NET experiment
             var experimentResults = experiment.Execute(data, progressHandler: new ProgressHandler());
-            // var experimentResults = experiment.Execute(data);
-
+            
             // 7. Log Best Run
             LogRun(experimentRequest.ExperimentId,experimentResults);
             
