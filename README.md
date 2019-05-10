@@ -1,6 +1,6 @@
 # ML.NET MLFlow Sample Application
 
-This application demos how to track model runs in MLFLow for models built using Automated ML in ML.NET
+This application demos how to track model runs in MLFLow for models built using Automated ML in ML.NET. For more details check out the [accompanying blog post](http://luisquintanilla.me/2019/05/09/ml-lifecycle-management-mlflow-automated-ml-net/).
 
 ## Prerequisites
 
